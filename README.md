@@ -219,7 +219,6 @@ The **Agentic RAG** mode is a pedagogical implementation of self-correcting RAG 
 - **RAG survey**, Gao et al., *Retrieval-Augmented Generation for Large Language Models: A Survey*, 2023. [arXiv:2312.10997](https://arxiv.org/abs/2312.10997), the naive → advanced → modular RAG design space the wizard walks through.
 - **RAG**, Lewis et al., *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks*, NeurIPS 2020. [arXiv:2005.11401](https://arxiv.org/abs/2005.11401), the foundational technique.
 
-The 2-page concept paper for the NeurIPS Educational Resources track lives in [`submission/`](submission/) (regenerate with `python3 submission/generate_concept_pdf.py`).
 
 ## 📄 License
 
