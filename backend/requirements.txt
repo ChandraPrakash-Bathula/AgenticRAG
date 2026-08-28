@@ -1,0 +1,24 @@
+# Floors, not exact pins. The previous exact pins (fastapi 0.115, pymupdf 1.24.10,
+# numpy 1.26, faiss-cpu 1.8) predate Python 3.12/3.13 and have no wheels for it, so
+# `pip install -r requirements.txt` failed at the pymupdf source build for anyone on a
+# current interpreter. These floors are the versions the test suite is verified against.
+
+fastapi>=0.136.0
+uvicorn>=0.45.0
+python-multipart>=0.0.20
+pydantic>=2.13.0
+
+# PDF text extraction. 1.25+ is the first line with cp313 wheels.
+pymupdf>=1.27.0
+
+# Embeddings, projection, and vector search.
+sentence-transformers>=5.4.0
+numpy>=2.4.0
+scikit-learn>=1.8.0
+umap-learn>=0.5.12
+faiss-cpu>=1.13.0
+
+# LLM providers and config.
+groq>=1.2.0
+requests>=2.32.3
+python-dotenv>=1.0.0
