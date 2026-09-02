@@ -524,7 +524,11 @@ button.step-indicator:focus-visible,
 
 /* ── Info popovers ───────────────────────────────────────────────────────── */
 .info-pop { position: relative; display: inline-flex; vertical-align: middle; }
-.select-card-wrap { position: relative; }
+/* The GRID child is the wrap, not the button, so the grid stretches the wrap while the
+   button inside keeps its content height. Cards then match only when their descriptions
+   happen to wrap to the same number of lines. Make the button fill its wrapper. */
+.select-card-wrap { position: relative; display: flex; }
+.select-card-wrap > .select-card { flex: 1; }
 .select-card-wrap > .info-pop { position: absolute; top: 10px; right: 10px; z-index: 2; }
 .info-pop-btn {
   appearance: none; -webkit-appearance: none;

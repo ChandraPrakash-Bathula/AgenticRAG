@@ -41,3 +41,10 @@ models_cache/
 # Submission drafts, not part of the resource
 paper.tex
 *.pptx
+
+# Not part of the published resource
+Dockerfile
+.dockerignore
+SPACE_README.md
+paper.tex
+*.pptx
