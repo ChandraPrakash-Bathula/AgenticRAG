@@ -1,4 +1,4 @@
-# 🧠 RAG Pipeline Studio
+# Self-Correcting-RAG Pipeline Studio
 
 **Self-correcting RAG, interactively, learn the reflective retrieval loop (Self-RAG / CRAG) by first building the naive pipeline it fixes**
 
@@ -216,14 +216,23 @@ handles a typical class comfortably; for anything larger, add a shared store (e.
 
 ## 📚 Research Background
 
-The **Agentic RAG** mode is a pedagogical implementation of self-correcting RAG from recent literature:
+The **Agentic RAG** mode is a pedagogical implementation of self-correcting RAG inspired by recent literature:
 
-- **Self-RAG**, Asai, Wu, Wang, Sil & Hajishirzi, *Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection*, ICLR 2024. [arXiv:2310.11511](https://arxiv.org/abs/2310.11511), the chunk-relevance and answer-support grading steps.
-- **CRAG**, Yan, Gu, Zhu & Ling, *Corrective Retrieval Augmented Generation*, 2024. [arXiv:2401.15884](https://arxiv.org/abs/2401.15884), the retrieval-evaluator + query-reformulation loop.
-- **FLARE**, Jiang et al., *Active Retrieval Augmented Generation*, EMNLP 2023. [arXiv:2305.06983](https://arxiv.org/abs/2305.06983), the retrieve-vs-answer-directly routing decision.
-- **RAG survey**, Gao et al., *Retrieval-Augmented Generation for Large Language Models: A Survey*, 2023. [arXiv:2312.10997](https://arxiv.org/abs/2312.10997), the naive → advanced → modular RAG design space the wizard walks through.
-- **RAG**, Lewis et al., *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks*, NeurIPS 2020. [arXiv:2005.11401](https://arxiv.org/abs/2005.11401), the foundational technique.
+* **Self-RAG**, Asai, Wu, Wang, Sil & Hajishirzi, *Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection*, 2023. [arXiv:2310.11511](https://arxiv.org/abs/2310.11511), provides the reflection-based retrieval, relevance grading, and answer-support mechanisms.
 
+* **FLARE**, Jiang et al., *Active Retrieval Augmented Generation*, EMNLP 2023. [DOI:10.18653/v1/2023.emnlp-main.495](https://doi.org/10.18653/v1/2023.emnlp-main.495), provides the adaptive retrieval policy underlying the retrieve-vs-answer-directly decision.
+
+* **Search-R1**, Jin et al., *Search-R1: Training LLMs to Reason and Leverage Search Engines with Reinforcement Learning*, 2025. [arXiv:2503.09516](https://arxiv.org/abs/2503.09516), demonstrates learned search decisions and reasoning over retrieved results.
+
+* **RAG**, Lewis et al., *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks*, 2021. [arXiv:2005.11401](https://arxiv.org/abs/2005.11401), provides the foundational retrieval-augmented generation framework.
+
+* **Agentic RAG Survey**, Singh et al., *Agentic Retrieval-Augmented Generation: A Survey on Agentic RAG*, 2026. [arXiv:2501.09136](https://arxiv.org/abs/2501.09136), frames reflection, verification, and iterative retrieval as an active design space in agentic RAG systems.
+
+* **CRAG**, Yan, Gu, Zhu & Ling, *Corrective Retrieval Augmented Generation*, 2024. [arXiv:2401.15884](https://arxiv.org/abs/2401.15884), provides the retrieval evaluator and corrective query-reformulation loop.
+
+
+## Github Repo: [https://github.com/ChandraPrakash-Bathula/AgenticRAG.git]
+#HF_Space: [https://huggingface.co/spaces/ChandraPrakashBathula/Self-RAG]
 
 ## 📄 License
 
