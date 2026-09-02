@@ -71,13 +71,18 @@ def _get_groq_client():
 #
 # `ollama_id: None` is the mirror image: a CLOUD-ONLY entry with no local counterpart
 # worth shipping. Each provider's list is therefore a filtered view of this one table.
+#
+# `id` is a provider-neutral SIZE CLASS, never a vendor model name. It used to be the
+# Groq id, which meant an Ollama-mode API response advertised "openai/gpt-oss-20b" for
+# a slot where DeepSeek-R1 1.5B actually ran. The id now identifies the slot; groq_id
+# and ollama_id identify the models that really execute in it.
 AVAILABLE_LLMS = [
     {
         # The only small chat model left on Groq's catalog, the entire Llama 3.x line
         # is gone, so this is what carries the "small model + RAG beats big model alone"
         # lesson in cloud mode. Note the 4K context (vs 131K for every other entry):
         # CONTEXT_LIMITS below keeps retrieved chunks from overflowing it.
-        "id": "allam-2-7b",
+        "id": "size-xs",
         "explainer": "SDAIA's Arabic-English bilingual model (7 billion parameters). The smallest chat model Groq still serves, useful for watching how much of the answer quality comes from retrieval rather than model scale. Its 4K context window is 32x smaller than the other cloud models here, so it holds far fewer retrieved chunks.",
         "ollama_explainer": None,
         "ollama_id": None,
@@ -109,7 +114,7 @@ AVAILABLE_LLMS = [
         # Groq retired the Llama 4 Scout endpoint (meta-llama/llama-4-scout-17b-16e-instruct
         # 404s as of 2026-07); GPT-OSS 20B is OpenAI's smaller open-weight sibling of the
         # 120B entry below and is live on Groq's current model catalog.
-        "id": "openai/gpt-oss-20b",
+        "id": "size-sm",
         "explainer": "OpenAI's smaller open-weight mixture-of-experts model (2025): ~21B total parameters, a fraction active per token via MoE routing. A lighter, faster sibling of GPT-OSS 120B below, useful for comparing how much reasoning quality that extra scale actually buys.",
         "ollama_explainer": "A tiny (1.5B) model distilled from DeepSeek-R1's reasoning traces: it 'thinks out loud' before answering. Fun to watch in the trace, but limited capacity, expect it to struggle with long contexts.",
         "ollama_id": "deepseek-r1:1.5b",
@@ -124,7 +129,7 @@ AVAILABLE_LLMS = [
     },
     {
         # Groq renamed/upgraded qwen/qwen3-32b to qwen/qwen3.6-27b; the old id 404s.
-        "id": "qwen/qwen3.6-27b",
+        "id": "size-md",
         "explainer": "Alibaba's Qwen 3.6 dense 27B model with an optional extended-thinking mode. Strong multilingual coverage and reasoning, a good choice for non-English documents.",
         "ollama_explainer": "Google's small open model from the Gemma 3 family (4B parameters). Good quality-per-parameter for local use on modest hardware.",
         "ollama_id": "gemma3:4b",
@@ -138,7 +143,7 @@ AVAILABLE_LLMS = [
         "icon": "🧮",
     },
     {
-        "id": "openai/gpt-oss-120b",
+        "id": "size-lg",
         "explainer": "OpenAI's open-weight mixture-of-experts model (2025): ~117B total parameters with ~5B active per token. The largest option here; strong reasoning, still fast on Groq thanks to the MoE design.",
         "ollama_explainer": "Mistral's classic dense 7B model, the 2023 release that proved small open models could compete. Still a reliable local workhorse for grounded answering.",
         "ollama_id": "mistral",
@@ -200,7 +205,7 @@ def fit_context_to_model(model_id: str, context: str, reserve_tokens: int = 900)
 # can serve, never the user's (possibly large) generation pick. Groq's cheapest live
 # chat model is GPT-OSS 20B; Ollama's is Phi-4 Mini. Resolved at call time, not import
 # time, so a provider switch (or a test monkeypatching LLM_PROVIDER) is picked up.
-_FAST_MODEL_BY_PROVIDER = {"groq": "openai/gpt-oss-20b", "ollama": "local-phi4-mini"}
+_FAST_MODEL_BY_PROVIDER = {"groq": "size-sm", "ollama": "local-phi4-mini"}
 
 
 def get_fast_model_id() -> str:

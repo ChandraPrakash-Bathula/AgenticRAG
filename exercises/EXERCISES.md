@@ -119,7 +119,7 @@ confidence badge, and the 💵 cost lines of both answers.
 <details><summary>Solution</summary>
 
 Map the steps first: *route* is Self-RAG's retrieve-decision, *gradeChunks* is CRAG's
-retrieval evaluator, *gradeAnswer* is Self-RAG's ISSUP (is-supported) critique,
+retrieval evaluator, *gradeAnswer* is Self-RAG's ISSUP (is-supported) critique plus its ISUSE utility score,
 *reformulate* is CRAG's corrective query rewrite. On a small focused document this is
 often a single clean pass; on this 1,200-page book expect **one or two real
 reformulations** before chunk grading accepts the evidence, vitamin D is discussed in

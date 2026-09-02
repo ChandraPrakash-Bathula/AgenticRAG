@@ -9,7 +9,11 @@
 
 An interactive lesson on **self-corrective retrieval**, the reflect → verify → retry loop from Self-RAG (ICLR 2024) and CRAG (2024) that today's agentic search systems build on. You first assemble a working naive RAG pipeline step by step (upload → chunk → embed → retrieve → generate) as the baseline, then flip one toggle and watch the same question run through the self-correcting loop, every routing decision, evidence grade, support verdict, reformulation, and its token/latency cost rendered live.
 
-Guided exercises with solutions (three difficulty levels) live in [`submission/EXERCISES.md`](submission/EXERCISES.md).
+The app has three sections: an **Overview** explaining what each pipeline stage teaches and why,
+a **Mechanisms** page with side-by-side figures of Self-RAG and CRAG as published versus what this
+code actually runs (every simplification named), and the **Playground** itself.
+
+Guided exercises with solutions (three difficulty levels) live in [`exercises/EXERCISES.md`](exercises/EXERCISES.md).
 
 ## ✨ Features
 
@@ -144,6 +148,7 @@ frontend/ (React + Vite)
     ├── config.js                # API base URL + per-tab session id
     ├── components/
     │   ├── Home.jsx             # Landing page: topics, the lesson, references
+    │   ├── Mechanisms.jsx       # Self-RAG and CRAG: paper vs implementation figures
     │   ├── StepWizard.jsx       # Wizard orchestrator + step gating
     │   ├── StepUpload.jsx       # PDF upload, text preview, worked example
     │   ├── StepChunking.jsx     # 4 strategies + parameters
@@ -174,7 +179,7 @@ backend/ (FastAPI)
 ## 🧪 Tests & CI
 
 ```bash
-# Backend (61 tests: chunking, agentic pipeline, API/sessions, LLM handler, retrieval, PDF cleaning)
+# Backend (68 tests: chunking, agentic pipeline, API/sessions, LLM handler, retrieval, PDF cleaning)
 pytest backend/tests
 
 # Frontend logic tests + production build

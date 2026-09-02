@@ -37,3 +37,7 @@ models_cache/
 # Temp files
 *.tmp
 *.log
+
+# Submission drafts, not part of the resource
+paper.tex
+*.pptx

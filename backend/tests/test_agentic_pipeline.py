@@ -208,3 +208,63 @@ def test_pipeline_threads_document_context_to_router(two_chunks, monkeypatch):
         document_context="Filename: nutrition.pdf\nOpening excerpt: macronutrients…",
     )
     assert "nutrition.pdf" in seen["user"]
+
+
+# ── ISUSE utility scoring ────────────────────────────────────────────────────
+def test_utility_is_parsed_and_clamped(monkeypatch):
+    """Models return "4", 4, or 4.0. All must land in 1-5 as an int."""
+    for raw, expected in [(5, 5), ("4", 4), (3.0, 3), (9, 5), (0, 1), (-2, 1)]:
+        monkeypatch.setattr(
+            agentic_rag, "query_llm_structured",
+            lambda *a, r=raw, **k: json.dumps(
+                {"supported": True, "missing": "", "confidence": "high", "utility": r}),
+        )
+        assert agentic_rag.grade_answer("m", "q", "a", [{"text": "c"}])["utility"] == expected
+
+
+def test_utility_fails_closed_on_garbage(monkeypatch):
+    """An unreadable score must mean useless, not average. A broken check may never
+    flatter the answer, the same rule the support verdict follows."""
+    monkeypatch.setattr(
+        agentic_rag, "query_llm_structured",
+        lambda *a, **k: json.dumps(
+            {"supported": True, "missing": "", "confidence": "high", "utility": "quite good"}),
+    )
+    assert agentic_rag.grade_answer("m", "q", "a", [{"text": "c"}])["utility"] == 1
+
+
+def test_utility_present_when_whole_grade_unparseable(monkeypatch):
+    monkeypatch.setattr(agentic_rag, "query_llm_structured", lambda *a, **k: "not json at all")
+    g = agentic_rag.grade_answer("m", "q", "a", [{"text": "c"}])
+    assert g["supported"] is False and g["utility"] == agentic_rag.UTILITY_ON_FAILURE
+
+
+def test_utility_is_independent_of_support(monkeypatch):
+    """The teaching case: a correct 'the document does not say' is fully supported
+    and nearly useless. The two axes must not collapse into one another."""
+    monkeypatch.setattr(
+        agentic_rag, "query_llm_structured",
+        lambda *a, **k: json.dumps(
+            {"supported": True, "missing": "", "confidence": "high", "utility": 1}),
+    )
+    g = agentic_rag.grade_answer("m", "q", "a", [{"text": "c"}])
+    assert g["supported"] is True and g["utility"] == 1
+
+
+def test_pipeline_surfaces_utility(two_chunks, monkeypatch):
+    monkeypatch.setattr(agentic_rag, "query_llm_structured", structured_responder([True, True]))
+    monkeypatch.setattr(agentic_rag, "query_llm", lambda *a, **k: "drafted answer")
+    r = agentic_rag.run_agentic_pipeline("m", ORIGINAL, None, ["a", "b"], "e")
+    assert "utility" in r
+    assert any(s["step"] == "gradeAnswer" and "utility" in s for s in r["trace"])
+
+
+def test_direct_answer_reports_utility_as_unknown(two_chunks, monkeypatch):
+    """Nothing was retrieved, so there is no grounded answer to rate."""
+    def responder(model_id, system, user, stats_sink=None, call_label="s"):
+        if call_label == "route":
+            return json.dumps({"needsRetrieval": False, "reason": "generic"})
+        return json.dumps({})
+    monkeypatch.setattr(agentic_rag, "query_llm_structured", responder)
+    monkeypatch.setattr(agentic_rag, "query_llm", lambda *a, **k: "direct")
+    assert agentic_rag.run_agentic_pipeline("m", "hi", None, ["a"], "e")["utility"] is None

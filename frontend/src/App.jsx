@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import Home from './components/Home'
+import Mechanisms from './components/Mechanisms'
 import StepWizard from './components/StepWizard'
 
 function App() {
@@ -43,6 +44,14 @@ function App() {
             </button>
             <button
               type="button"
+              className={`app-nav-link ${view === 'mechanisms' ? 'active' : ''}`}
+              aria-current={view === 'mechanisms' ? 'page' : undefined}
+              onClick={() => setView('mechanisms')}
+            >
+              Mechanisms
+            </button>
+            <button
+              type="button"
               className={`app-nav-link ${view === 'wizard' ? 'active' : ''}`}
               aria-current={view === 'wizard' ? 'page' : undefined}
               onClick={() => setView('wizard')}
@@ -54,9 +63,9 @@ function App() {
       </header>
 
       <main className="app-main">
-        {view === 'home'
-          ? <Home onStart={() => setView('wizard')} />
-          : <StepWizard />}
+        {view === 'home' && <Home onStart={() => setView('wizard')} />}
+        {view === 'mechanisms' && <Mechanisms onStart={() => setView('wizard')} />}
+        {view === 'wizard' && <StepWizard />}
       </main>
     </div>
   )

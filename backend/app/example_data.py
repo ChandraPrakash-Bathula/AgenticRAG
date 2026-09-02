@@ -90,21 +90,24 @@ EXAMPLE_QUESTIONS = [
     # The five above are answerable from a single chunk, so retrieval succeeds on the
     # first try and the self-correction loop never fires: they demonstrate the
     # plain-LLM vs RAG gap, not the naive vs agentic one. These two ask about nutrients
-    # outside the Ch 3-6 excerpt, which is where the loop runs for real. Naive RAG has
-    # no way to say "I could not find this" and, on a small model, will fabricate a
-    # plausible table row. Agentic RAG grades the chunks irrelevant, reformulates,
-    # exhausts its passes, and reports LOW confidence. That is the fail-closed
-    # behaviour, observable without Demo Mode.
+    # that appear NOWHERE in the Ch 3-6 excerpt, which is where the loop runs for real.
+    #
+    # Verified absent by substring count against app/data/nutrition_excerpt.txt. Do not
+    # swap in calcium, iron, zinc, magnesium or vitamins A/C/D/E: all of those ARE
+    # mentioned in passing, so retrieval returns plausible neighbouring tables and the
+    # model misattributes a nearby figure (sodium's 1,500 mg/day was being reported as
+    # a calcium recommendation, and the answer graded as "supported"). Any replacement
+    # must be grepped against the corpus first.
     {
-        "question": "According to this book, how much calcium should teenagers consume daily?",
-        "chapter": "Not in this excerpt (minerals are Ch. 8)",
-        "expectedFact": "Nothing. Calcium is outside Chapters 3-6, so the honest answer is that this excerpt does not say. Watch naive RAG answer anyway while agentic RAG grades the evidence, retries, and reports low confidence.",
+        "question": "According to this book, what is the recommended daily intake of riboflavin?",
+        "chapter": "Not in this excerpt (vitamins are Ch. 7)",
+        "expectedFact": "Nothing. Riboflavin appears nowhere in Chapters 3-6, so the honest answer is that this excerpt does not say. Watch whether each mode admits that or invents a number.",
         "outOfCorpus": True,
     },
     {
-        "question": "According to this book, what is the recommended daily intake of vitamin D in micrograms?",
+        "question": "According to this book, how much vitamin K do adults need per day?",
         "chapter": "Not in this excerpt (vitamins are Ch. 7)",
-        "expectedFact": "Nothing. Vitamin D is outside Chapters 3-6. Compare how each mode signals that it could not find an answer, and at what cost.",
+        "expectedFact": "Nothing. Vitamin K appears nowhere in Chapters 3-6. Compare how each mode signals that it could not find an answer, and at what cost.",
         "outOfCorpus": True,
     },
 ]

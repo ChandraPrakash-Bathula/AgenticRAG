@@ -56,7 +56,7 @@ def test_groq_mode_never_offers_a_model_it_cannot_serve(groq_mode):
     list for Ollama mode. Offering one in Groq mode hands the user an id that 404s."""
     for m in llm_handler.get_available_llms():
         assert m.get("groq_id"), f"{m['id']} has no Groq endpoint but is offered in Groq mode"
-    assert llm_handler.get_fast_model_id() == "openai/gpt-oss-20b"
+    assert llm_handler.get_fast_model_id() == "size-sm"
     assert llm_handler.is_model_available(llm_handler.get_fast_model_id()) is True
 
 
@@ -104,7 +104,7 @@ def test_ollama_connection_error_raises_unavailable(ollama_mode, monkeypatch):
 def test_missing_groq_key_raises_unavailable(groq_mode, monkeypatch):
     monkeypatch.setattr(llm_handler, "GROQ_API_KEY", "")
     with pytest.raises(llm_handler.LLMUnavailableError, match="GROQ_API_KEY"):
-        llm_handler.query_llm_structured("openai/gpt-oss-20b", "s", "u")
+        llm_handler.query_llm_structured("size-sm", "s", "u")
 
 
 def test_truncation_flags():
@@ -139,3 +139,13 @@ def test_truncation_flags():
 ])
 def test_safe_json_parse(raw, expected):
     assert llm_handler.safe_json_parse(raw) == expected
+
+
+def test_ids_are_provider_neutral(groq_mode):
+    """Regression: ids used to BE the Groq id, so an Ollama-mode API response advertised
+    "openai/gpt-oss-20b" for a slot where DeepSeek-R1 1.5B actually ran."""
+    vendor = ("openai/", "qwen/", "meta-llama/", "google/", "mistralai/")
+    for m in llm_handler.AVAILABLE_LLMS:
+        assert not m["id"].startswith(vendor), f"{m['id']} leaks a vendor namespace"
+        if m.get("groq_id") and m.get("ollama_id"):
+            assert m["id"] != m["groq_id"], f"{m['id']} is a Groq id but also runs locally"

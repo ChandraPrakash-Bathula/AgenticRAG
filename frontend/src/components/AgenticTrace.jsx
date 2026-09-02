@@ -16,7 +16,7 @@ const WHY_TOOLTIP = {
   retrieve: 'The retrieval step shared by both Self-RAG and CRAG, fetches candidate passages from the vector index for the current query.',
   gradeChunks: "CRAG's retrieval evaluator, grades each retrieved passage as relevant/irrelevant before it's allowed into the context (CRAG itself uses a finer Correct/Ambiguous/Incorrect scale).",
   draftAnswer: 'Standard RAG generation, produce an answer conditioned only on the chunks that passed grading.',
-  gradeAnswer: "Self-RAG's \"ISSUP\" (is-supported) reflection token, critiques whether the generation is actually backed by the retrieved evidence, catching unsupported or fabricated claims.",
+  gradeAnswer: "Self-RAG's \"ISSUP\" (is-supported) and \"ISUSE\" (utility, 1 to 5) reflection tokens. ISSUP critiques whether the generation is actually backed by the retrieved evidence, catching unsupported or fabricated claims; ISUSE rates how well it answers the question. They are separate on purpose: a correct \"the document does not say\" is fully supported and nearly useless.",
   reformulate: "CRAG's query-rewriting / knowledge-refinement step, when evidence is insufficient, rewrite the query and retry retrieval instead of answering from weak context.",
   directAnswer: "Self-RAG's no-retrieval branch, the router decided external evidence wasn't necessary, so the model answers directly from its own knowledge.",
 }
@@ -35,7 +35,11 @@ function stepSummary(entry) {
     case 'draftAnswer':
       return 'drafted an answer from the kept chunks'
     case 'gradeAnswer':
-      return entry.supported ? `supported ✓ · confidence: ${entry.confidence}` : `not fully supported ✕ · confidence: ${entry.confidence}`
+      return [
+        entry.supported ? 'supported ✓' : 'not fully supported ✕',
+        `confidence: ${entry.confidence}`,
+        entry.utility != null ? `usefulness: ${entry.utility}/5` : null,
+      ].filter(Boolean).join(' · ')
     case 'reformulate':
       return `rewrote the query → "${entry.newQuery}"`
     case 'directAnswer':
@@ -131,7 +135,18 @@ function StepBody({ entry, trace }) {
               {entry.supported ? '✓ supported by sources' : '✕ not fully supported'}
             </span>
             <span className="trace-confidence">confidence: {entry.confidence}</span>
+            {entry.utility != null && (
+              <span className={`grade-tag ${entry.utility >= 4 ? 'relevant' : entry.utility <= 2 ? 'irrelevant' : ''}`}>
+                usefulness {entry.utility}/5
+              </span>
+            )}
           </div>
+          {entry.supported && entry.utility != null && entry.utility <= 2 && (
+            <p className="trace-detail-text muted">
+              Grounded but not useful: every claim traces back to the chunks, yet it does not
+              really answer the question. Support and usefulness are separate judgements.
+            </p>
+          )}
           {entry.missing ? (
             <div className="trace-critique">
               <strong>Self-critique:</strong> {entry.missing}

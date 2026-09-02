@@ -168,14 +168,38 @@ def reformulate_query(
     return parsed["newQuery"]
 
 
+# Self-RAG's ISUSE token, scored 1 to 5. Deliberately a SEPARATE axis from `supported`:
+# an answer can be perfectly grounded in the retrieved chunks and still fail to answer
+# what was asked ("the document does not say" is fully supported and rarely useful).
+# Collapsing the two would hide exactly the case worth teaching.
+UTILITY_MIN, UTILITY_MAX = 1, 5
+UTILITY_ON_FAILURE = UTILITY_MIN
+
+
+def _coerce_utility(value) -> int:
+    """Clamp the grader's utility score into 1-5, failing closed to the floor.
+
+    Models return "4", 4, 4.0, or prose. Anything unreadable is treated as useless
+    rather than average, for the same reason an unparseable support verdict is
+    treated as unsupported: a broken check must never flatter the answer."""
+    try:
+        return max(UTILITY_MIN, min(UTILITY_MAX, int(float(value))))
+    except (TypeError, ValueError):
+        return UTILITY_ON_FAILURE
+
+
 def grade_answer(model_id: str, query: str, draft_answer: str, chunks: List[Dict], stats: Optional[list] = None) -> Dict:
     system = (
         "You are a fact-checking component in a RAG pipeline. You will be given a draft "
         "answer and the source chunks it was generated from. Determine whether every claim "
         "in the answer is actually supported by the chunks. Flag anything unsupported or "
         "fabricated.\n"
+        "Separately, rate how USEFUL the answer is as a response to the query, from 1 to 5. "
+        "These are different judgements: an answer that correctly says the document does not "
+        "cover the question is fully supported but has low utility. 5 means it directly and "
+        "completely answers what was asked; 1 means it does not address the query at all.\n"
         'Respond ONLY in JSON: {"supported": true|false, "missing": "<what\'s unsupported or '
-        'missing, empty string if none>", "confidence": "high"|"medium"|"low"}'
+        'missing, empty string if none>", "confidence": "high"|"medium"|"low", "utility": 1-5}'
     )
     context = "\n\n---\n\n".join(c["text"] for c in chunks)
     user = f"Query: {query}\nDraft answer: {draft_answer}\nSource chunks:\n{context}"
@@ -188,12 +212,14 @@ def grade_answer(model_id: str, query: str, draft_answer: str, chunks: List[Dict
             "supported": False,
             "missing": "grader response could not be parsed, defaulting to unsupported",
             "confidence": "low",
+            "utility": UTILITY_ON_FAILURE,
             "gradingFailed": True,
         }
     return {
         "supported": bool(parsed["supported"]),
         "missing": parsed.get("missing", ""),
         "confidence": parsed.get("confidence", "medium"),
+        "utility": _coerce_utility(parsed.get("utility")),
     }
 
 
@@ -261,6 +287,7 @@ def run_agentic_pipeline(
         return {
             "answer": answer,
             "confidence": "high",
+            "utility": None,  # nothing was retrieved, so there is no grounded answer to rate
             "trace": trace,
             "retrievedChunks": [],
             "loopsUsed": 0,
@@ -272,7 +299,8 @@ def run_agentic_pipeline(
     current_query = query
     tried_queries = [query]
     failure_reasons: List[str] = []
-    best_attempt: Dict = {"answer": None, "confidence": "low", "chunks": []}
+    best_attempt: Dict = {"answer": None, "confidence": "low",
+                          "utility": UTILITY_ON_FAILURE, "chunks": []}
     last_retrieved_chunks: List[Dict] = []
     loop_count = 0
 
@@ -336,12 +364,14 @@ def run_agentic_pipeline(
         grade = grade_answer(grader_model, query, draft_answer, relevant_chunks, stats=stats)
         log("gradeAnswer", loop_count, query=query, **grade)
 
-        best_attempt = {"answer": draft_answer, "confidence": grade["confidence"], "chunks": relevant_chunks}
+        best_attempt = {"answer": draft_answer, "confidence": grade["confidence"],
+                        "utility": grade["utility"], "chunks": relevant_chunks}
 
         if grade["supported"]:
             return {
                 "answer": draft_answer,
                 "confidence": grade["confidence"],
+                "utility": grade["utility"],
                 "trace": trace,
                 "retrievedChunks": relevant_chunks,
                 "loopsUsed": loop_count + 1,
@@ -384,6 +414,7 @@ def run_agentic_pipeline(
     return {
         "answer": best_attempt["answer"],
         "confidence": "low",
+        "utility": best_attempt["utility"],
         "note": "Max loops reached, returning best attempt.",
         "trace": trace,
         "retrievedChunks": best_attempt["chunks"],

@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()  # Load .env file before any other imports
 import json
 import tempfile
+from pathlib import Path
 import numpy as np
 from collections import OrderedDict
 from threading import Lock
@@ -517,3 +518,38 @@ def query_agentic(req: AgenticQueryRequest, session: dict = Depends(get_session)
 @app.get("/api/health")
 def health():
     return {"status": "ok", "ollama": check_ollama_status()}
+
+
+# ── Single-port static serving (Hugging Face Spaces, Docker, any one-port host) ──
+# A Space exposes exactly ONE port, so the built React app has to come from this
+# process rather than a separate Vite server. Mounted LAST, after every /api route is
+# registered, so it can never shadow the API. If the bundle is absent (normal local
+# development, where Vite serves the frontend on 5173) this block is skipped entirely
+# and nothing about the dev workflow changes.
+# Repo layout puts the bundle at <repo>/frontend/dist. The container copies backend/ to
+# /app and the bundle to /frontend/dist, which this same expression happens to resolve
+# to, but relying on that coincidence is fragile, so FRONTEND_DIST can state it outright.
+_FRONTEND_DIST = Path(
+    os.environ.get("FRONTEND_DIST")
+    or Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
+)
+
+if _FRONTEND_DIST.is_dir():
+    from fastapi.responses import FileResponse
+    from fastapi.staticfiles import StaticFiles
+
+    app.mount("/assets", StaticFiles(directory=_FRONTEND_DIST / "assets"), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def spa(full_path: str):
+        """Serve the SPA, falling back to index.html for client-side routes.
+
+        Unknown /api paths must still 404 as JSON rather than silently returning the
+        HTML shell, otherwise a typo in a fetch looks like a parse error to the caller.
+        """
+        if full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="Not found")
+        candidate = (_FRONTEND_DIST / full_path).resolve()
+        if full_path and candidate.is_file() and candidate.is_relative_to(_FRONTEND_DIST):
+            return FileResponse(candidate)
+        return FileResponse(_FRONTEND_DIST / "index.html")

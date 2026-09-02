@@ -1160,3 +1160,73 @@ button.step-indicator:focus-visible,
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   .trace-node { opacity: 1; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Mechanisms page: paper vs implementation figures.
+   Appended, so nothing above is altered. Diagram colour is carried entirely by
+   the existing tokens, and the only saturated fills mark a deliberate gap.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.mech-figure { margin-bottom: 60px; scroll-margin-top: 24px; }
+
+.mech-cite { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-line); }
+.mech-cite:hover { border-bottom-color: var(--accent); }
+.mech-cite:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.mech-pair {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  border: 1px solid var(--rule); border-radius: var(--radius-lg);
+  padding: 18px; background: var(--paper);
+}
+.mech-col { min-width: 0; }
+.mech-col-head {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--ink-faint); text-align: center; padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule); margin-bottom: 12px;
+}
+.mech-svg { width: 100%; height: auto; display: block; }
+
+/* Diagram primitives */
+.mech-box { fill: var(--paper-sunk); stroke: var(--rule-strong); stroke-width: 1; }
+.mech-box.mech-io { fill: var(--paper); stroke: var(--ink); }
+.mech-box.mech-decide { fill: var(--accent-wash); stroke: var(--accent-line); }
+.mech-box.mech-score { fill: var(--success-wash); stroke: var(--success-line); }
+.mech-box.mech-loop { fill: var(--warning-wash); stroke: var(--warning-line); }
+.mech-box.mech-absent { fill: var(--error-wash); stroke: var(--error-line); stroke-dasharray: 4 3; }
+.mech-box.mech-branch { fill: var(--paper); stroke: var(--rule-strong); }
+
+.mech-label { fill: var(--ink); font-size: 11px; font-weight: 600; font-family: 'Inter', sans-serif; }
+.mech-label.sm { font-size: 10px; }
+.mech-sub { fill: var(--ink-faint); font-size: 9px; font-family: 'JetBrains Mono', monospace; }
+.mech-edge { fill: var(--ink-faint); font-size: 8.5px; font-family: 'JetBrains Mono', monospace; }
+.mech-arrow { stroke: var(--rule-strong); stroke-width: 1.2; }
+.mech-tip { fill: var(--rule-strong); }
+
+.mech-caption {
+  font-size: 0.82rem; color: var(--ink-faint); line-height: 1.65;
+  margin: 12px 0 26px; padding-left: 14px; border-left: 2px solid var(--rule);
+}
+
+.mech-deltas-title {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1rem; font-weight: 600; color: var(--ink); margin-bottom: 12px;
+}
+.mech-deltas { display: flex; flex-direction: column; border-top: 1px solid var(--rule); }
+.mech-delta { padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.mech-delta-head {
+  display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; margin-bottom: 5px;
+}
+.mech-delta-paper { font-size: 0.86rem; font-weight: 600; color: var(--ink); }
+.mech-delta-arrow { color: var(--ink-faint); }
+.mech-delta-app {
+  font-size: 0.82rem; color: var(--accent-ink);
+  font-family: 'JetBrains Mono', monospace;
+}
+.mech-delta-why { font-size: 0.84rem; color: var(--ink-soft); line-height: 1.68; }
+
+@media (max-width: 760px) {
+  /* Stacked, the two columns read as before-and-after rather than side-by-side,
+     which is still the comparison. Each SVG keeps its own aspect ratio. */
+  .mech-pair { grid-template-columns: 1fr; gap: 22px; padding: 14px; }
+  .mech-figure { margin-bottom: 44px; }
+}
