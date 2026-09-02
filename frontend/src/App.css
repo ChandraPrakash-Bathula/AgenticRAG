@@ -1234,3 +1234,60 @@ button.step-indicator:focus-visible,
   .mech-pair { grid-template-columns: 1fr; gap: 22px; padding: 14px; }
   .mech-figure { margin-bottom: 44px; }
 }
+
+/* ── Mechanisms: foundations layer (pipeline figure, spec tables, concepts) ──
+   Appended so nothing above changes. Reuses the existing .mech-* diagram tokens. */
+
+.mech-figure-frame {
+  border: 1px solid var(--rule); border-radius: var(--radius-lg);
+  padding: 18px; background: var(--paper); overflow-x: auto;
+}
+.mech-figure-frame .mech-svg { min-width: 620px; }
+
+/* Scatter marks in the retrieved-versus-relevant figure */
+.mech-dot { fill: var(--rule-strong); }
+.mech-dot.rel { fill: var(--success); }
+.mech-topk { fill: var(--accent-wash); stroke: var(--accent-line); stroke-dasharray: 4 3; opacity: 0.75; }
+.mech-detail-label {
+  fill: var(--ink-faint); font-size: 8px; font-weight: 700; letter-spacing: 0.08em;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Spec tables: real options in the app, one row each */
+.mech-table-wrap {
+  border: 1px solid var(--rule); border-radius: var(--radius);
+  overflow-x: auto; margin-bottom: 22px;
+}
+.mech-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; min-width: 560px; }
+.mech-table th {
+  text-align: left; padding: 9px 13px; background: var(--paper-sunk);
+  border-bottom: 1px solid var(--rule); color: var(--ink);
+  font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.07em; font-weight: 700;
+}
+.mech-table td { padding: 11px 13px; border-bottom: 1px solid var(--rule); color: var(--ink-soft); line-height: 1.6; }
+.mech-table tr:last-child td { border-bottom: none; }
+.mech-td-name { color: var(--ink); font-weight: 600; white-space: nowrap; }
+.mech-td-mono { font-family: 'JetBrains Mono', monospace; font-size: 0.73rem; color: var(--ink-faint); }
+
+/* The four foundational concepts, side by side under the pipeline diagram */
+.mech-concepts {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 22px;
+}
+.mech-concept {
+  padding: 16px; border: 1px solid var(--rule); border-radius: var(--radius);
+  background: var(--paper-sunk); min-width: 0;
+}
+.mech-concept h4 {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 0.98rem; font-weight: 600; color: var(--ink); margin-bottom: 6px;
+}
+.mech-concept p { font-size: 0.84rem; color: var(--ink-soft); line-height: 1.65; }
+.mech-concept-note {
+  font-size: 0.86rem; color: var(--ink-soft); line-height: 1.68;
+  padding-left: 16px; border-left: 2px solid var(--rule-strong); max-width: 70ch;
+}
+
+@media (max-width: 760px) {
+  .mech-concepts { grid-template-columns: 1fr; }
+  .mech-figure-frame { padding: 12px; }
+}
