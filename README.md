@@ -230,9 +230,10 @@ The **Agentic RAG** mode is a pedagogical implementation of self-correcting RAG 
 
 * **CRAG**, Yan, Gu, Zhu & Ling, *Corrective Retrieval Augmented Generation*, 2024. [arXiv:2401.15884](https://arxiv.org/abs/2401.15884), provides the retrieval evaluator and corrective query-reformulation loop.
 
+## 🌐 Public Availability
 
-## Github Repo: [https://github.com/ChandraPrakash-Bathula/AgenticRAG.git]
-#HF_Space: [https://huggingface.co/spaces/ChandraPrakashBathula/Self-RAG]
+* **GitHub Repository:** [AgenticRAG](https://github.com/ChandraPrakash-Bathula/AgenticRAG)
+* **Hugging Face Space:** [Self-RAG](https://huggingface.co/spaces/ChandraPrakashBathula/Self-RAG)
 
 ## 📄 License
 
